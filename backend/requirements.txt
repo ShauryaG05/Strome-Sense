@@ -5,3 +5,4 @@ pydantic-settings
 google-generativeai
 scikit-learn
 numpy
+google-genai
