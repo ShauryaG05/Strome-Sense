@@ -36,3 +36,6 @@ def compute_risk(cyclone: CycloneData, flood_p: float, vuln: float) -> RiskScore
         flood=round(flood_score, 1),
         vulnerability=round(vuln_score, 1)
     )
+
+calculate_risk = compute_risk
+

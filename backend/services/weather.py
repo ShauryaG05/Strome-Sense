@@ -33,3 +33,8 @@ async def fetch_weather(lat: float, lon: float) -> CycloneData:
         storm_surge=surge, rainfall=rain,
         name=d.get("name", "Unknown"),
     )
+
+async def get_current_cyclone(lat: float = 19.5, lon: float = 86.5) -> CycloneData:
+    """Fetch current cyclone data for the active storm or coordinates."""
+    return await fetch_weather(lat, lon)
+

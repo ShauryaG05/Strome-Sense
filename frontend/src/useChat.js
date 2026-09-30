@@ -1,9 +1,9 @@
 import { useCallback, useRef, useState } from "react";
 
 /**
- * Owns chat state and talks to YOUR backend.
- * Expected contract:  POST {endpoint}  body: { messages: [{role, content}] }
- *                     response:        { reply: "text from the AI model" }
+ * Owns chat state and talks to backend.
+ * Expected contract:  POST {endpoint}  body: { messages: [{role, content}], message: "text" }
+ *                     response:        { response: "...", reply: "..." }
  */
 const DEFAULT_ENDPOINT = `${import.meta.env.VITE_API_BASE_URL || '/api'}/chat`;
 
@@ -29,14 +29,18 @@ export function useChat({ endpoint = DEFAULT_ENDPOINT } = {}) {
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ messages: history.map(({ role, content }) => ({ role, content })) }),
+          body: JSON.stringify({
+            message: content,
+            messages: history.map(({ role, content }) => ({ role, content })),
+          }),
           signal: controller.signal,
         });
         if (!res.ok) throw new Error(`Request failed (${res.status})`);
         const data = await res.json();
+        const responseText = data.response || data.reply || "No response received.";
         setMessages((m) => [
           ...m,
-          { id: crypto.randomUUID(), role: "assistant", content: data.reply, createdAt: Date.now() },
+          { id: crypto.randomUUID(), role: "assistant", content: responseText, createdAt: Date.now() },
         ]);
       } catch (err) {
         if (err.name === "AbortError") return;

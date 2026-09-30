@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "../useChat";
 
-const SUGGESTIONS = ["Summarize my last order", "Explain how billing works", "Help me write a support email"];
+const SUGGESTIONS = [
+  "What is the current cyclone status?",
+  "What is the cyclone risk in Odisha?",
+  "What is the risk in Chennai for the next 24 hours?",
+  "What factors contributed to the risk score?",
+];
 
 const time = (ts) => new Date(ts).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
@@ -33,7 +38,7 @@ function Message({ msg }) {
               : `px-0.5 py-1 ${msg.error ? "text-red-600 dark:text-red-400" : "text-neutral-900 dark:text-neutral-100"}`
           }
         >
-          <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed [text-wrap:pretty]">
+          <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-pretty">
             {msg.content}
           </p>
         </div>
@@ -120,7 +125,7 @@ export default function ChatPage({
         <div className="mx-auto flex min-h-full max-w-3xl flex-col px-4 py-6">
           {messages.length === 0 ? (
             <div className="my-auto flex flex-col items-center gap-6 text-center">
-              <h2 className="text-2xl font-semibold [text-wrap:balance]">What can I help you with?</h2>
+              <h2 className="text-2xl font-semibold text-balance">What can I help you with?</h2>
               <div className="flex flex-wrap justify-center gap-2">
                 {SUGGESTIONS.map((s) => (
                   <button
@@ -161,18 +166,17 @@ export default function ChatPage({
             onKeyDown={onKeyDown}
             placeholder="Message the assistant…"
             aria-label="Message"
-            className="max-h-[200px] min-h-10 flex-1 resize-none bg-transparent px-3 py-2 text-[15px] leading-6 outline-none placeholder:text-neutral-400 dark:placeholder:text-neutral-500"
+            className="max-h-50 min-h-10 flex-1 resize-none bg-transparent px-3 py-2 text-[15px] leading-6 outline-none placeholder:text-neutral-400 dark:placeholder:text-neutral-500"
           />
           <button
             type="button"
             onClick={() => (isLoading ? stop() : submit())}
             disabled={!isLoading && !canSend}
             aria-label={isLoading ? "Stop generating" : "Send message"}
-            className={`relative size-10 shrink-0 rounded-2xl transition-[background-color,transform,opacity] duration-150 active:scale-[0.96] disabled:active:scale-100 ${
-              isLoading || canSend
+            className={`relative size-10 shrink-0 rounded-2xl transition-[background-color,transform,opacity] duration-150 active:scale-[0.96] disabled:active:scale-100 ${isLoading || canSend
                 ? "bg-blue-600 text-white hover:bg-blue-500"
                 : "bg-neutral-100 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-500"
-            }`}
+              }`}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`${iconBase} ${isLoading ? iconOff : iconOn}`} aria-hidden="true">
               <path d="M12 19V5M5 12l7-7 7 7" />

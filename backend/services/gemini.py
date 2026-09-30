@@ -5,13 +5,13 @@ from services.weather import CycloneData
 import json
 import re
 
-_client = None
-
 def _get_client():
-    global _client
-    if _client is None:
-        _client = genai.Client(api_key=settings.gemini_api_key)
-    return _client
+    key = settings.gemini_api_key
+    if key and key not in ("YOUR_GEMINI_API_KEY", ""):
+        return genai.Client(api_key=key)
+    return None
+
+
 
 PROMPT_TEMPLATE = """
 You are a disaster risk analyst. Given cyclone data, return structured advisory.
@@ -29,6 +29,7 @@ Respond in this exact JSON:
   "timeline_hours": N
 }}
 """
+
 
 def _demo_advisory(cyclone: CycloneData, risk: RiskScore) -> dict:
     """Return a realistic mock advisory for demo mode (no API key)."""
@@ -69,8 +70,11 @@ async def get_advisory(cyclone: CycloneData, risk: RiskScore) -> dict:
         w=risk.wind, s=risk.surge, f=risk.flood, v=risk.vulnerability,
     )
     
-    models_to_try = ["gemini-3.8-flash", "gemini-flash-latest", "gemini-2.5-flash-lite"]
+    models_to_try = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-2.5-flash-lite"]
     client = _get_client()
+    if not client:
+        return _demo_advisory(cyclone, risk)
+
 
     for model_name in models_to_try:
         try:

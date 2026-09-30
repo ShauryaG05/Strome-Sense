@@ -8,6 +8,7 @@ app = FastAPI(title="Cyclone Risk Platform", version="0.1.0")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.get_cors_origins(),
+    allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -30,4 +31,3 @@ def root():
 @app.get("/health")
 def health():
     return {"status": "ok"}
-

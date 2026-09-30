@@ -32,10 +32,10 @@ export default function Navbar({
   const dotClass = loading
     ? 'bg-amber-500 animate-pulse'
     : assessment
-    ? 'bg-emerald-600 shadow-[0_0_0_4px_rgb(5_150_105/0.2)]'
-    : hasLocation
-    ? 'bg-sky-500'
-    : 'bg-neutral-400'
+      ? 'bg-emerald-600 shadow-[0_0_0_4px_rgb(5_150_105/0.2)]'
+      : hasLocation
+        ? 'bg-sky-500'
+        : 'bg-neutral-400'
 
   return (
     <header className="relative z-20 shrink-0 grid grid-cols-[1fr_auto] items-center gap-3 px-4 py-4 md:grid-cols-[1fr_auto_1fr] md:px-8 md:py-5">
@@ -87,11 +87,10 @@ export default function Navbar({
       <nav aria-label="Primary" className={`${pill} justify-self-end gap-1 p-1.5`}>
         {links.slice(0, 3).map(({ label, href, cta }) => {
           const isInternal = href.startsWith('/')
-          const className = `rounded-full px-3 py-2 text-sm font-bold transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 sm:px-4 sm:text-[15px] ${
-            cta
+          const className = `rounded-full px-3 py-2 text-sm font-bold transition active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 sm:px-4 sm:text-[15px] ${cta
               ? 'bg-rose-600 text-white hover:bg-rose-500'
               : 'hover:bg-black/[0.07]'
-          }`
+            }`
 
           return isInternal ? (
             <Link key={label} to={href} className={className}>
