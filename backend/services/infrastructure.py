@@ -11,25 +11,40 @@ class InfrastructureData:
 
 def _overpass_query(lat: float, lon: float, radius: int, amenity: str) -> str:
     return f"""
-    [out:json][timeout:10];
+    [out:json][timeout:5];
     node[amenity={amenity}](around:{radius},{lat},{lon});
     out count;
     """
 
 async def fetch_infrastructure(lat: float, lon: float, radius: int = 10000) -> InfrastructureData:
-    async with httpx.AsyncClient(timeout=15) as client:
-        # hospitals
-        r = await client.post(OVERPASS_URL, data={"data": _overpass_query(lat, lon, radius, "hospital")})
-        hospitals = r.json().get("elements", []) if r.is_success else []
+    hospitals = []
+    roads = 0
+    power = 0
+    try:
+        async with httpx.AsyncClient(timeout=6.0) as client:
+            try:
+                r = await client.post(OVERPASS_URL, data={"data": _overpass_query(lat, lon, radius, "hospital")})
+                if r.is_success:
+                    hospitals = r.json().get("elements", [])
+            except Exception:
+                pass
 
-        # roads (way count proxy)
-        road_q = f"[out:json][timeout:10];way[highway](around:{radius},{lat},{lon});out count;"
-        r2 = await client.post(OVERPASS_URL, data={"data": road_q})
-        roads = r2.json().get("elements", [{}])[0].get("tags", {}).get("total", 0) if r2.is_success else 0
+            try:
+                road_q = f"[out:json][timeout:5];way[highway](around:{radius},{lat},{lon});out count;"
+                r2 = await client.post(OVERPASS_URL, data={"data": road_q})
+                if r2.is_success:
+                    roads = r2.json().get("elements", [{}])[0].get("tags", {}).get("total", 0)
+            except Exception:
+                pass
 
-        # power
-        power_q = f"[out:json][timeout:10];node[power](around:{radius},{lat},{lon});out count;"
-        r3 = await client.post(OVERPASS_URL, data={"data": power_q})
-        power = r3.json().get("elements", [{}])[0].get("tags", {}).get("total", 0) if r3.is_success else 0
+            try:
+                power_q = f"[out:json][timeout:5];node[power](around:{radius},{lat},{lon});out count;"
+                r3 = await client.post(OVERPASS_URL, data={"data": power_q})
+                if r3.is_success:
+                    power = r3.json().get("elements", [{}])[0].get("tags", {}).get("total", 0)
+            except Exception:
+                pass
+    except Exception:
+        pass
 
-    return InfrastructureData(hospitals=hospitals, roads_count=int(roads), power_nodes=int(power))
+    return InfrastructureData(hospitals=hospitals, roads_count=int(roads or 0), power_nodes=int(power or 0))
