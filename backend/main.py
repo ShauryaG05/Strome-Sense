@@ -18,6 +18,16 @@ app.include_router(weather.router, prefix="/api")
 app.include_router(alerts.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
 
+@app.get("/")
+def root():
+    return {
+        "status": "online",
+        "service": "StormSense API",
+        "docs": "/docs",
+        "health": "/health"
+    }
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
