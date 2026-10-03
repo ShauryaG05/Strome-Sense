@@ -7,7 +7,7 @@
 
 ## Overview
 
-**StormSense** is an end-to-end geospatial intelligence platform designed for real-time tropical cyclone risk assessment and emergency response coordination. By combining live weather telemetry, elevation profiles, machine learning vulnerability scoring, and Generative AI, StormSense turns raw environmental data into actionable disaster management decisions.
+**StormSense** is an end-to-end geospatial intelligence platform designed for real-time tropical cyclone risk assessment and emergency response coordination. By combining live weather telemetry, elevation profiles, machine learning vulnerability scoring, and Generative AI powered by **Grok AI (xAI)**, StormSense turns raw environmental data into actionable disaster management decisions.
 
 ---
 
@@ -28,14 +28,15 @@
    - Powered by a **Scikit-Learn `RandomForestClassifier`**.
    - Assesses localized population density, hospital accessibility, shelter availability ratios, and economic vulnerability indices.
 
-4. **AI-Powered Emergency Advisories**
-   - Deep integration with **Google Gemini AI**.
+4. **AI-Powered Emergency Advisories & Live Chatbot**
+   - Deep integration with **Grok AI (xAI API)**.
    - Generates structured, location-tailored emergency advisories containing:
      - Plain-language situation summaries.
      - Immediate evacuation and precautionary steps.
      - Precise geographic evacuation zone boundaries.
      - Quantified resource deployment requirements (shelters, medical teams, rescue boats).
      - Response urgency timelines (hours).
+   - Conversational AI Assistant with real-time tool calling (`get_location_risk`, `get_current_cyclone_data`).
 
 5. **Infrastructure Proximity Analysis**
    - Integrates with **OpenStreetMap Overpass API** to discover nearby critical infrastructure (hospitals, road network counts, and power grid nodes).
@@ -60,7 +61,7 @@
 - **Async HTTP**: HTTPX
 
 ### AI & Machine Learning
-- **Generative AI**: Google GenAI SDK (`gemini-3.8-flash` / `gemini-flash-latest`)
+- **Generative AI**: Grok AI (`grok-2-latest` / `grok-beta` via xAI API)
 - **Machine Learning**: Scikit-Learn (`RandomForestClassifier`), NumPy
 
 ### External Data APIs
@@ -78,10 +79,11 @@ flowchart TD
     
     subgraph Frontend Layer
         Frontend --> StatsPanel[Stats & Radial Risk Chart]
-        Frontend --> AdvisoryUI[Gemini Advisory UI]
+        Frontend --> AdvisoryUI[Grok Advisory UI]
     end
     
     Frontend -->|GET /api/risk/assess?lat=...&lon=...| Backend[FastAPI Backend]
+    Frontend -->|POST /api/chat| Backend
     
     subgraph Backend Services & Models
         Backend -->|Fetch Weather| OW[OpenWeather API]
@@ -93,16 +95,18 @@ flowchart TD
         
         OW & FloodModel & RFModel --> RiskEngine[Composite Risk Engine]
         
-        RiskEngine -->|Calculated Metrics| Gemini[Google Gemini AI Service]
+        RiskEngine -->|Calculated Metrics| Grok[Grok AI Service]
+        Chatbot[Grok Tool-Calling Assistant] -->|Tool Invocation| RiskEngine
     end
     
-    Gemini -->|Structured Advisory JSON| Backend
+    Grok -->|Structured Advisory JSON| Backend
+    Chatbot -->|Conversational Stream / Reply| Backend
     Backend -->|JSON Response| Frontend
 ```
 
 ---
 
-##  Project Directory Structure
+## Project Directory Structure
 
 ```text
 cyclone-risk-platform/
@@ -118,11 +122,13 @@ cyclone-risk-platform/
 │   ├── routes/
 │   │   ├── risk.py            # Main risk assessment endpoint (/api/risk/assess)
 │   │   ├── weather.py         # Weather proxy routes
-│   │   └── alerts.py          # Alert dispatch routes
+│   │   ├── alerts.py          # Alert dispatch routes
+│   │   └── chat.py            # Grok AI live assistant chat endpoint
 │   └── services/
 │       ├── weather.py         # OpenWeather API integration
 │       ├── infrastructure.py  # Overpass OpenStreetMap API client
-│       └── gemini.py          # Google Gemini AI advisory generator
+│       ├── grok.py            # Grok AI advisory generator
+│       └── chatbot.py         # Grok AI conversational agent with tool calling
 └── frontend/
     ├── index.html             # Main HTML entry
     ├── vite.config.js         # Vite configuration & proxy settings
@@ -131,11 +137,16 @@ cyclone-risk-platform/
         ├── main.jsx           # React app mounting point
         ├── App.jsx            # Core application state & layout
         ├── index.css          # Global TailwindCSS & layout styling
+        ├── Pages/
+        │   ├── Home.jsx            # Landing page with 3D storm scene & overview
+        │   ├── Dashboard.jsx       # Risk assessment & map intelligence dashboard
+        │   └── ChatPage.jsx        # Grok AI Assistant interactive chat
         └── components/
             ├── Navbar.jsx          # Header navigation & coordinate search bar
             ├── RiskMap.jsx         # Leaflet interactive map & risk overlays
             ├── StatsPanel.jsx      # Risk breakdown chart & cyclone statistics
-            └── GeminiAdvisory.jsx  # AI advisory card & emergency dispatch button
+            ├── GrokAdvisory.jsx    # AI advisory card & emergency dispatch button
+            └── StormScene.jsx      # Three.js dynamic storm background scene
 ```
 
 ---
@@ -171,7 +182,9 @@ cyclone-risk-platform/
    Create or edit the `.env` file in the `backend/` directory:
    ```env
    OPENWEATHER_API_KEY=your_openweather_api_key_here
-   GEMINI_API_KEY=your_google_gemini_api_key_here
+   GROK_API_KEY=your_xai_grok_api_key_here
+   # Optional:
+   # GROK_MODEL=grok-2-latest
    ```
    *(Note: If API keys are omitted, the backend automatically runs in graceful demo mode with mock data and advisories).*
 
@@ -208,7 +221,8 @@ cyclone-risk-platform/
 
 | Method | Endpoint | Description |
 | :--- | :--- | :--- |
-| `GET` | `/api/risk/assess?lat={lat}&lon={lon}` | Evaluates cyclone risk, infrastructure, and generates Gemini advisory |
+| `GET` | `/api/risk/assess?lat={lat}&lon={lon}` | Evaluates cyclone risk, infrastructure, and generates Grok advisory |
+| `POST` | `/api/chat` | Grok AI cyclone assistant with live tool-calling |
 | `POST` | `/api/alerts/dispatch` | Dispatches emergency alert for an assessed location |
 | `GET` | `/health` | Health check endpoint returning backend status |
 

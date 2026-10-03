@@ -5,7 +5,11 @@ import { useCallback, useRef, useState } from "react";
  * Expected contract:  POST {endpoint}  body: { messages: [{role, content}], message: "text" }
  *                     response:        { response: "...", reply: "..." }
  */
-const DEFAULT_ENDPOINT = `${import.meta.env.VITE_API_BASE_URL || '/api'}/chat`;
+const rawBase = import.meta.env.VITE_API_BASE_URL || '';
+const apiBase = rawBase.replace(/\/+$/, '');
+const DEFAULT_ENDPOINT = apiBase
+  ? (apiBase.endsWith('/api') ? `${apiBase}/chat` : `${apiBase}/api/chat`)
+  : '/api/chat';
 
 export function useChat({ endpoint = DEFAULT_ENDPOINT } = {}) {
   const [messages, setMessages] = useState([]);

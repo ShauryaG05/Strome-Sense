@@ -18,6 +18,7 @@ app.include_router(risk.router, prefix="/api")
 app.include_router(weather.router, prefix="/api")
 app.include_router(alerts.router, prefix="/api")
 app.include_router(chat.router, prefix="/api")
+app.include_router(chat.router)  # Also expose /chat directly for compatibility
 
 @app.get("/")
 def root():

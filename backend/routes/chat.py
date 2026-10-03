@@ -4,7 +4,7 @@ from typing import Literal, Optional, Union
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from services.chatbot import chat_with_gemini
+from services.chatbot import chat_with_grok
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
         raise HTTPException(status_code=400, detail="A non-empty 'message' or 'messages' list is required.")
 
     try:
-        response_text = await chat_with_gemini(query)
+        response_text = await chat_with_grok(query)
         return ChatResponse(
             response=response_text,
             reply=response_text,

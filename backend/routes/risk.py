@@ -2,7 +2,7 @@ import logging
 from fastapi import APIRouter, Query
 from services.weather import fetch_weather, CycloneData
 from services.infrastructure import fetch_infrastructure, InfrastructureData
-from services.gemini import get_advisory
+from services.grok import get_advisory
 from models.risk_engine import compute_risk, RiskScore
 from models.flood_model import flood_probability, estimate_elevation, estimate_coast_distance
 from models.vulnerability import vulnerability_score

@@ -1,13 +1,11 @@
 import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Dashboard from './components/Dashboard'
-import AIChat from './components/ChatPage'
+import Home from './Pages/Home'
+import Dashboard from './Pages/Dashboard'
+import AIChat from './Pages/ChatPage'
 
 /**
  * App Component - Central Application Router & Flow Controller
- * 
- * Manage application routing, shared state, and component integration here.
- * Add new pages and view components by defining new <Route /> paths below.
  */
 export default function App() {
   // Global shared state across different views (e.g. current cyclone assessment)
@@ -16,9 +14,30 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Main Cyclone Risk Assessment & Map Dashboard */}
+        {/* Landing Page */}
+        <Route path="/" element={<Home />} />
+
+        {/* Cyclone Risk Assessment & Map Dashboard */}
         <Route
-          path="/"
+          path="/forecast"
+          element={
+            <Dashboard
+              sharedAssessment={assessment}
+              onAssessmentChange={setAssessment}
+            />
+          }
+        />
+        <Route
+          path="/map"
+          element={
+            <Dashboard
+              sharedAssessment={assessment}
+              onAssessmentChange={setAssessment}
+            />
+          }
+        />
+        <Route
+          path="/dashboard"
           element={
             <Dashboard
               sharedAssessment={assessment}
@@ -27,16 +46,11 @@ export default function App() {
           }
         />
 
-        <Route
-          path="/dashboard"
-          element={<Dashboard sharedAssessment={assessment} onAssessmentChange={setAssessment} />}
-        />
+        {/* Grok AI Emergency Assistant & Disaster Chatbot */}
+        <Route path="/chat" element={<AIChat assessment={assessment} />} />
+        <Route path="/ai-chat" element={<AIChat assessment={assessment} />} />
 
-        {/* Gemini AI Emergency Assistant & Disaster Chatbot */}
-        <Route path="/chat" element={<AIChat assessment={assessment} />}/>
-        <Route path="/ai-chat" element={<AIChat assessment={assessment} />}/>
-
-        {/* Fallback route - Redirect any unknown URL to root */}
+        {/* Fallback route */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

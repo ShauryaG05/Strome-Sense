@@ -2,7 +2,6 @@ fastapi
 uvicorn
 httpx
 pydantic-settings
-google-generativeai
 scikit-learn
 numpy
-google-genai
+openai
